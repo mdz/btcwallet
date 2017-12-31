@@ -24,6 +24,23 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Copied from lnd.go
+var (
+  tlsCipherSuites = []uint16{
+    tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+    tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+    tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+    tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+    tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+    tls.TLS_RSA_WITH_AES_128_CBC_SHA256,
+    tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+    tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+    tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+    tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+    tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+  }
+)
+
 // openRPCKeyPair creates or loads the RPC TLS keypair specified by the
 // application config.  This function respects the cfg.OneTimeTLSKey setting.
 func openRPCKeyPair() (tls.Certificate, error) {
@@ -122,6 +139,7 @@ func startRPCServers(walletLoader *wallet.Loader) (*grpc.Server, *legacyrpc.Serv
 		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{keyPair},
 			MinVersion:   tls.VersionTLS12,
+      CipherSuites: tlsCipherSuites,
 			NextProtos:   []string{"h2"}, // HTTP/2 over TLS
 		}
 		legacyListen = func(net string, laddr string) (net.Listener, error) {
